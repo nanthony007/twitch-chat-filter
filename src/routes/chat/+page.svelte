@@ -3,17 +3,18 @@
 	import { redirect } from '@sveltejs/kit';
 
 	const token = $page.data.session?.access_token;
+	console.log(token);
 	const username = $page.data.session?.user?.name;
-	if (!token || !username) {
-		// redirect to the home page if the user is not signed in
-		redirect(300, '/');
-	}
 
 	let messages: string[] = [];
 	let openConnection = false;
 	let errorConnection = false;
 	let closedConnection = false;
 	let selectedUsername = 'username';
+
+	if (!token || !username) {
+		errorConnection = true;
+	}
 
 	function addMessage(message: string) {
 		messages = [...messages, message];
