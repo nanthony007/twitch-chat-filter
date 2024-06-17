@@ -1,39 +1,27 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { redirect } from '@sveltejs/kit';
 
 	const token = $page.data.session?.access_token;
-	console.log(token);
 	const username = $page.data.session?.user?.name;
 
+	console.log(token);
+	console.log(username);
+
 	let messages: string[] = [];
-	let openConnection = false;
 	let errorConnection = false;
 	let closedConnection = false;
-	let selectedUsername = 'username';
-
-	if (!token || !username) {
-		errorConnection = true;
-	}
-
-	function addMessage(message: string) {
-		messages = [...messages, message];
-	}
 
 	let ws = new WebSocket('ws://irc-ws.chat.twitch.tv:80');
-	ws.onopen = () => {
-		// tags and commands capabilities
-		// tags required for filtering on user status
+	ws.onopen = (event) => {
 		ws.send('CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands');
 		ws.send(`PASS oauth:${token}`);
 		ws.send(`NICK ${username}`);
-		// default join your channel
 		ws.send(`JOIN #${username}`);
-		openConnection = true;
+		console.log(event);
 	};
 	ws.onmessage = (event) => {
 		console.log(event.data);
-		addMessage(event.data);
+		messages = [...messages, event.data];
 	};
 	ws.onerror = (error) => {
 		console.error(error);
@@ -64,11 +52,10 @@
 			<p class="font-thin">{message}</p>
 		{/each}
 
-		{#if openConnection}
-			<p>Connection opened</p>
-		{:else if errorConnection}
+		{#if errorConnection}
 			<p class="text-red-700">Connection error, see logs. Refresh page</p>
-		{:else if closedConnection}
+		{/if}
+		{#if closedConnection}
 			<p class="text-green-700">Connection closed</p>
 		{/if}
 	{:else}
