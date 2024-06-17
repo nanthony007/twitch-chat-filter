@@ -8,7 +8,7 @@ async function authorizationHandle({ event, resolve }) {
 		const session = await event.locals.auth();
 		if (!session) {
 			// Redirect to the signin page
-			throw redirect(303, '/auth/signin');
+			throw redirect(303, '/signin');
 		}
 	}
 

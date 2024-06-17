@@ -7,7 +7,7 @@
 </svelte:head>
 
 <section>
-	<h1>
+	<h1 class="text-emerald-900">
 		<span class="welcome"> </span>
 
 		to your new<br />SvelteKit app
