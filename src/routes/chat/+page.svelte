@@ -1,5 +1,19 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+
+	// let ws = new WebSocket('ws://localhost:3000');
+	// ws.onopen = () => {
+	// 	ws.send(JSON.stringify({ type: 'auth', token: $page.data.session?.token }));
+	// };
+	// ws.onmessage = (event) => {
+	// 	console.log(event.data);
+	// };
+	// ws.onclose = () => {
+	// 	console.log('Connection closed');
+	// };
+	// ws.onerror = (error) => {
+	// 	console.error(error);
+	// };
 </script>
 
 {#if $page.data.session}
