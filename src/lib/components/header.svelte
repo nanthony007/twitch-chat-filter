@@ -16,6 +16,7 @@
 					{$page.data.session.user?.email ?? $page.data.session.user?.name}
 				</span>
 				<p>{$page.data.session.user.name}</p>
+				<p>{$page.data.session.account.access_token}</p>
 				<SignOut>
 					<div slot="submitButton" class="buttonPrimary">Sign out</div>
 				</SignOut>
