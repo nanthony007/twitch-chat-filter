@@ -15,7 +15,7 @@
 				<span class="signedInText">
 					{$page.data.session.user?.email ?? $page.data.session.user?.name}
 				</span>
-				<p>{$page.data.session.user}</p>
+				<p>{$page.data.session.user.name}</p>
 				<SignOut>
 					<div slot="submitButton" class="buttonPrimary">Sign out</div>
 				</SignOut>
