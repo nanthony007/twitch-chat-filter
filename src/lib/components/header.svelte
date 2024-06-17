@@ -2,14 +2,6 @@
 	import { page } from '$app/stores';
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { redirect } from '@sveltejs/kit';
-
-	function signInAndRedirect() {
-		signIn('twitch').then(() => redirect(300, '/chat'));
-	}
-
-	function signOutAndRedirect() {
-		signOut().then(() => redirect(300, '/'));
-	}
 </script>
 
 <header>
@@ -28,7 +20,7 @@
 				{:else}
 					<button
 						class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
-						on:click={() => signInAndRedirect()}>Sign In</button
+						on:click={() => signIn('twitch')}>Sign In</button
 					>
 				{/if}
 			</li>
@@ -36,7 +28,7 @@
 				{#if $page.data.session}
 					<button
 						class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
-						on:click={() => signOutAndRedirect()}>Sign Out</button
+						on:click={() => signOut()}>Sign Out</button
 					>
 				{/if}
 			</li>
