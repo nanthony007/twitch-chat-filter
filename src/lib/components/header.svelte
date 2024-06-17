@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { signIn, signOut } from '@auth/sveltekit/client';
-	import { redirect } from '@sveltejs/kit';
 </script>
 
 <header>
