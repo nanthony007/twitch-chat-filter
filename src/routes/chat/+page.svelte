@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { redirect } from '@sveltejs/kit';
+
 	const token = $page.data.session?.access_token;
 	const username = $page.data.session?.user?.name;
 	if (!token || !username) {
 		// redirect to the home page if the user is not signed in
-		import { redirect } from '@sveltejs/kit';
 		redirect(300, '/');
 	}
 
