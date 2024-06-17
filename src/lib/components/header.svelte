@@ -18,6 +18,9 @@
 				<SignOut>
 					<div slot="submitButton" class="buttonPrimary">Sign out</div>
 				</SignOut>
+				<p class="underline bg-red-300 font-bold">
+					{$page.data.session.user.token}
+				</p>
 			{:else}
 				<span class="notSignedInText">You are not signed in</span>
 				<SignIn>
