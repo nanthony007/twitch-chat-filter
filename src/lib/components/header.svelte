@@ -1,40 +1,45 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { SignIn, SignOut } from '@auth/sveltekit/components';
+	import { signIn, signOut } from '@auth/sveltekit/client';
+	import { redirect } from '@sveltejs/kit';
+
+	function signInAndRedirect() {
+		signIn('twitch').then(() => redirect(300, '/chat'));
+	}
+
+	function signOutAndRedirect() {
+		signOut().then(() => redirect(300, '/'));
+	}
 </script>
 
 <header>
-	<div class="signedInStatus">
-		<div class="nojs-show loaded">
-			<img
-				alt="User avatar"
-				src={$page.data?.session?.user?.image ?? 'https://source.boringavatars.com/marble/120'}
-				class="avatar"
-			/>
-			{#if $page.data.session}
-				<span class="signedInText">
-					{$page.data.session.user?.email ?? $page.data.session.user?.name}
-				</span>
-				<p>{$page.data.session.user.name}</p>
-				<p>{$page.data.session.account.access_token}</p>
-				<SignOut>
-					<div slot="submitButton" class="buttonPrimary">Sign out</div>
-				</SignOut>
-				<p class="underline bg-red-300 font-bold">
-					{$page.data.session.access_token}
-				</p>
-			{:else}
-				<span class="notSignedInText">You are not signed in</span>
-				<SignIn>
-					<div slot="submitButton" class="buttonPrimary">Sign in</div>
-				</SignIn>
-			{/if}
-		</div>
-	</div>
 	<nav>
-		<ul class="navItems">
-			<li class="navItem"><a href="/">Home</a></li>
-			<li class="navItem"><a href="/chat">Chat</a></li>
+		<ul class="flex justify-between bg-slate-400 font-bold text-lg">
+			<li class="mr-3">
+				<img
+					alt="User avatar"
+					src={$page.data?.session?.user?.image ?? 'https://source.boringavatars.com/marble/120'}
+					class="avatar"
+				/>
+			</li>
+			<li class="mr-3">
+				{#if $page.data.session}
+					<p class="inline-block border">{$page.data?.session?.user?.name}</p>
+				{:else}
+					<button
+						class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+						on:click={() => signInAndRedirect()}>Sign In</button
+					>
+				{/if}
+			</li>
+			<li class="mr-3">
+				{#if $page.data.session}
+					<button
+						class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+						on:click={() => signOutAndRedirect()}>Sign Out</button
+					>
+				{/if}
+			</li>
 		</ul>
 	</nav>
 </header>
