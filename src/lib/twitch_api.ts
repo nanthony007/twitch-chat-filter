@@ -1,5 +1,5 @@
-import { parseMessage } from './parser';
-import { networkError, socketClosed, chatMessages } from './stores';
+import { parseMessage } from "./parser";
+import { networkError, socketClosed, chatMessages } from "./stores";
 
 export interface UserInfo {
 	id: string;
@@ -20,9 +20,9 @@ interface UsersData {
 }
 
 export const connectWS = (token: string, username: string): WebSocket => {
-	const ws = new WebSocket('ws://irc-ws.chat.twitch.tv:80');
+	const ws = new WebSocket("ws://irc-ws.chat.twitch.tv:80");
 	ws.onopen = () => {
-		ws.send('CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands');
+		ws.send("CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands");
 		ws.send(`PASS oauth:${token}`);
 		ws.send(`NICK ${import.meta.env.VITE_PUBLIC_BOT_USERNAME}`);
 		ws.send(`JOIN #${username}`);
@@ -35,18 +35,18 @@ export const connectWS = (token: string, username: string): WebSocket => {
 		// console.log(event.data);
 		const parsed = parseMessage(event.data);
 		if (parsed instanceof Error) {
-			console.error(parsed);
+			console.error(parsed.message);
 			networkError.set(true);
 			return;
 		}
 		// otherwise ignore
-		if (parsed.command.command === 'PRIVMSG') {
+		if (parsed.command.command === "PRIVMSG") {
 			chatMessages.update((msgs) => [...msgs, parsed]);
 			return;
 		}
 	};
-	ws.onerror = (err) => {
-		console.error(`Error: ${err}`);
+	ws.onerror = (event) => {
+		console.error(`WebSocket error: ${event}`);
 		networkError.set(true);
 	};
 	ws.onclose = () => {
@@ -57,12 +57,12 @@ export const connectWS = (token: string, username: string): WebSocket => {
 };
 
 export const fetchDisplayName = async (token: string): Promise<UserInfo> => {
-	const users = await fetch('https://api.twitch.tv/helix/users', {
-		method: 'GET',
+	const users = await fetch("https://api.twitch.tv/helix/users", {
+		method: "GET",
 		headers: {
 			Authorization: `Bearer ${token}`,
-			'Client-Id': import.meta.env.VITE_PUBLIC_CLIENT_ID
-		}
+			"Client-Id": import.meta.env.VITE_PUBLIC_CLIENT_ID,
+		},
 	})
 		.then((res) => res.json())
 		.then((data) => data as UsersData)
@@ -71,7 +71,7 @@ export const fetchDisplayName = async (token: string): Promise<UserInfo> => {
 			networkError.set(true);
 		});
 	if (!users) {
-		throw new Error('Failed to fetch user data');
+		throw new Error("Failed to fetch user data");
 	}
 	return users.data[0];
 };

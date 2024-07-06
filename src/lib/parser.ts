@@ -4,18 +4,18 @@
 // Expects the caller to pass a single message. (Remember, the Twitch
 // IRC server may send one or more IRC messages in a single message.)
 
-import { type Result, type Option } from './utilities';
+import { type Result, type Option } from "./utilities";
 
 function stringToBoolean(x: string): Result<boolean> {
 	switch (x) {
-		case '1':
+		case "1":
 			return true;
-		case '0':
+		case "0":
 			return false;
-		case '':
+		case "":
 			return false;
 		default:
-			return Error('Invalid boolean string');
+			return Error("Invalid boolean string");
 	}
 }
 
@@ -44,28 +44,28 @@ function parseTagSection(x: string): Result<TagData> {
 		subMonths: null,
 		isMod: false,
 		isTurbo: false,
-		displayName: ''
+		displayName: "",
 	};
 	// this is bad lol
 	// TODO: handle:
 	// =;badges=moderator/1,partner/1;c
-	x.split(';').forEach((tag) => {
-		const [key, value] = tag.split('=');
-		if (value !== '') {
+	x.split(";").forEach((tag) => {
+		const [key, value] = tag.split("=");
+		if (value !== "") {
 			switch (key) {
-				case 'badge-info':
-					if (value !== '') {
+				case "badge-info":
+					if (value !== "") {
 						// skip if empty
-						value.split(',').forEach((badge) => {
-							const [label, data] = badge.split('/');
-							if (data !== '') {
+						value.split(",").forEach((badge) => {
+							const [label, data] = badge.split("/");
+							if (data !== "") {
 								const intValue = parseInt(data);
 								if (isNaN(intValue)) {
-									return Error('Invalid badge info');
+									return Error("Invalid badge info");
 								}
 								switch (label) {
 									// sub months
-									case 'subscriber': {
+									case "subscriber": {
 										tagData.subMonths = intValue;
 									}
 								}
@@ -73,25 +73,25 @@ function parseTagSection(x: string): Result<TagData> {
 						});
 					}
 					break;
-				case 'turbo':
-				case 'subscriber':
-				case 'mod': {
+				case "turbo":
+				case "subscriber":
+				case "mod": {
 					const booleanValue = stringToBoolean(value.trim());
 					if (booleanValue instanceof Error) {
 						return booleanValue;
 					}
-					if (key == 'turbo') {
+					if (key == "turbo") {
 						tagData.isTurbo = booleanValue;
-					} else if (key == 'subscriber') {
+					} else if (key == "subscriber") {
 						tagData.isSub = booleanValue;
-					} else if (key == 'mod') {
+					} else if (key == "mod") {
 						tagData.isMod = booleanValue;
 					} else {
 						return Error(`Unexpected key: ${key}`);
 					}
 					break;
 				}
-				case 'display-name':
+				case "display-name":
 					tagData.displayName = value.trim();
 					break;
 			}
@@ -107,88 +107,88 @@ interface SourceData {
 
 /** Parse the source section for host and nick if available */
 function parseSourceSection(x: string): Result<Option<SourceData>> {
-	const sourceParts = x.split('!');
+	const sourceParts = x.split("!");
 	if (sourceParts.length === 0) {
 		return null;
 	} else if (sourceParts.length === 1) {
 		return {
 			host: sourceParts[0],
-			nick: null
+			nick: null,
 		};
 	} else if (sourceParts.length === 2) {
 		return {
 			host: sourceParts[1],
-			nick: sourceParts[0]
+			nick: sourceParts[0],
 		};
 	} else {
-		return Error('Invalid source section');
+		return Error("Invalid source section");
 	}
 }
 
 /** Command Enum */
 enum Command {
-	JOIN = 'JOIN', // user or bot joins channel, won't be used for >1k users in chatroom
-	PART = 'PART', // user leaves channel
-	PRIVMSG = 'PRIVMSG',
-	LOGIN = 'LOGIN',
+	JOIN = "JOIN", // user or bot joins channel, won't be used for >1k users in chatroom
+	PART = "PART", // user leaves channel
+	PRIVMSG = "PRIVMSG",
+	LOGIN = "LOGIN",
 	// other section, not really needed for our purposes right now
 	// IRC commands
-	NOTICE = 'NOTICE', // something like banning a user
-	USERNOTICE = 'USERNOTICE', // sent when events occur like subbing
-	CLEARCHAT = 'CLEARCHAT', // bot/mod removes all messages
-	CLEARMSG = 'CLEARMSG', // bot/mod removes a single message
-	GLOBALUSERSTATE = 'GLOBALUSERSTATE', // sent after bot auths
-	HOSTTARGET = 'HOSTTARGET', // sent when channel starts/stops hosting
-	RECONNECT = 'RECONNECT', // server is going to restart
-	ROOMSTATE = 'ROOMSTATE', // sent when bot joins channel or channel settings change
-	USERSTATE = 'USERSTATE', // sent when user joins channel or bot sends PRIVMSG
-	WHISPER = 'WHISPER', // sent when user sends a whisper
+	NOTICE = "NOTICE", // something like banning a user
+	USERNOTICE = "USERNOTICE", // sent when events occur like subbing
+	CLEARCHAT = "CLEARCHAT", // bot/mod removes all messages
+	CLEARMSG = "CLEARMSG", // bot/mod removes a single message
+	GLOBALUSERSTATE = "GLOBALUSERSTATE", // sent after bot auths
+	HOSTTARGET = "HOSTTARGET", // sent when channel starts/stops hosting
+	RECONNECT = "RECONNECT", // server is going to restart
+	ROOMSTATE = "ROOMSTATE", // sent when bot joins channel or channel settings change
+	USERSTATE = "USERSTATE", // sent when user joins channel or bot sends PRIVMSG
+	WHISPER = "WHISPER", // sent when user sends a whisper
 	// others...
-	PING = 'PING',
-	CAP = 'CAP',
-	OTHERS = 'OTHERS'
+	PING = "PING",
+	CAP = "CAP",
+	OTHERS = "OTHERS",
 }
 
 /** Convert a string to a Command enum */
 function stringToCommand(x: string): Result<Command> {
 	switch (x) {
-		case 'JOIN':
+		case "JOIN":
 			return Command.JOIN;
-		case 'PRIVMSG':
+		case "PRIVMSG":
 			return Command.PRIVMSG;
-		case '001':
+		case "001":
 			return Command.LOGIN;
-		case '353':
+		case "353":
 			return Command.OTHERS;
-		case 'PART':
+		case "PART":
 			return Command.PART;
-		case 'NOTICE':
+		case "NOTICE":
 			return Command.NOTICE;
-		case 'USERNOTICE':
+		case "USERNOTICE":
 			return Command.USERNOTICE;
-		case 'CLEARCHAT':
+		case "CLEARCHAT":
 			return Command.CLEARCHAT;
-		case 'CLEARMSG':
+		case "CLEARMSG":
 			return Command.CLEARMSG;
-		case 'GLOBALUSERSTATE':
+		case "GLOBALUSERSTATE":
 			return Command.GLOBALUSERSTATE;
-		case 'HOSTTARGET':
+		case "HOSTTARGET":
 			return Command.HOSTTARGET;
-		case 'RECONNECT':
+		case "RECONNECT":
 			return Command.RECONNECT;
-		case 'ROOMSTATE':
+		case "ROOMSTATE":
 			return Command.ROOMSTATE;
-		case 'USERSTATE':
+		case "USERSTATE":
 			return Command.USERSTATE;
-		case 'WHISPER':
+		case "WHISPER":
 			return Command.WHISPER;
-		case 'PING':
+		case "PING":
 			return Command.PING;
-		case 'CAP':
+		case "CAP":
 			return Command.CAP;
 		default:
 			return Error(
-				`Invalid command string: ${x}. Expected one of ${Object.values(Command).join(', ')}`
+				`Invalid command string: ${x}. Expected one of ${Object.values(Command).join(", ")}`
 			);
 	}
 }
@@ -198,14 +198,14 @@ interface CommandData {
 }
 
 function parseCommandSection(x: string): Result<CommandData> {
-	const commandParts = x.split(' ');
+	const commandParts = x.split(" ");
 	const commandResult = stringToCommand(commandParts[0]);
 	if (commandResult instanceof Error) {
 		return commandResult;
 	} else {
 		return {
 			command: commandResult,
-			channel: commandParts[1]
+			channel: commandParts[1],
 		};
 	}
 }
@@ -219,15 +219,15 @@ function parseMessage(message: string): Result<ParsedMessage> {
 		subMonths: null,
 		isMod: false,
 		isTurbo: false,
-		displayName: ''
+		displayName: "",
 	};
 	let sourceData: Option<SourceData> = null;
 	let commandData: Option<CommandData> = null;
 	let contentData: Option<string> = null;
 
-	if (message[idx] === '@') {
+	if (message[idx] === "@") {
 		// message has tags
-		const endIdx = message.indexOf(' ');
+		const endIdx = message.indexOf(" ");
 		const tagsSection = message.slice(1, endIdx);
 		const tagResult = parseTagSection(tagsSection);
 		if (tagResult instanceof Error) {
@@ -240,10 +240,10 @@ function parseMessage(message: string): Result<ParsedMessage> {
 
 	// Get the source component (nick and host) of the IRC message.
 	// The idx should point to the source part; otherwise, it's a PING command.
-	if (message[idx] === ':') {
+	if (message[idx] === ":") {
 		// skip the colon
 		idx += 1;
-		const endIdx = message.indexOf(' ', idx);
+		const endIdx = message.indexOf(" ", idx);
 		const sourceSection = message.slice(idx, endIdx);
 		const sourceResult = parseSourceSection(sourceSection);
 		if (sourceResult instanceof Error) {
@@ -256,7 +256,7 @@ function parseMessage(message: string): Result<ParsedMessage> {
 
 	// Get the command component of the IRC message.
 	// next colon is the message content section, so we go until there
-	const endIdx = message.indexOf(':', idx);
+	const endIdx = message.indexOf(":", idx);
 	const commandSection = message.slice(idx, endIdx);
 	const commandResult = parseCommandSection(commandSection);
 	if (commandResult instanceof Error) {
@@ -273,14 +273,14 @@ function parseMessage(message: string): Result<ParsedMessage> {
 		const contentSection = message.slice(idx);
 		contentData = contentSection;
 	} else {
-		return Error('No content section found');
+		return Error("No content section found");
 	}
 
 	const parsed: ParsedMessage = {
 		tags: tagData,
 		source: sourceData,
 		command: commandData,
-		content: contentData
+		content: contentData,
 	};
 	return parsed;
 }
