@@ -4,8 +4,7 @@
 // Expects the caller to pass a single message. (Remember, the Twitch
 // IRC server may send one or more IRC messages in a single message.)
 
-type Option<T> = T | null;
-type Result<T> = T | Error;
+import { type Result, type Option } from './utilities';
 
 function stringToBoolean(x: string): Result<boolean> {
 	switch (x) {
@@ -22,7 +21,7 @@ function stringToBoolean(x: string): Result<boolean> {
 
 /** Fully parsed message data,
  * does not parse all messages only relevant ones. */
-export interface ParsedMessage {
+interface ParsedMessage {
 	tags: TagData;
 	source: Option<SourceData>;
 	/** Command data  */
@@ -88,7 +87,7 @@ function parseTagSection(x: string): Result<TagData> {
 					} else if (key == 'mod') {
 						tagData.isMod = booleanValue;
 					} else {
-						return Error(`Unexpected key: ${key}`)
+						return Error(`Unexpected key: ${key}`);
 					}
 					break;
 				}
@@ -211,7 +210,7 @@ function parseCommandSection(x: string): Result<CommandData> {
 	}
 }
 
-export function parseMessage(message: string): Result<ParsedMessage> {
+function parseMessage(message: string): Result<ParsedMessage> {
 	// The start index. Increments as we parse the IRC message.
 	let idx = 0;
 
@@ -285,3 +284,5 @@ export function parseMessage(message: string): Result<ParsedMessage> {
 	};
 	return parsed;
 }
+
+export { parseMessage, type ParsedMessage };

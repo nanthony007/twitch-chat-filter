@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	.text-colored {
+		@apply text-slate-900 dark:text-gray-200;
+	}
+	.text-success {
+		@apply text-green-700 dark:text-green-400;
+	}
+	.text-error {
+		@apply text-red-700 dark:text-red-400;
+	}
+	.mono-font {
+		font-family: 'Berkeley Mono', system-ui, sans-serif;
+	}
+}
