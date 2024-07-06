@@ -21,7 +21,7 @@
 </svelte:head>
 
 <main>
-	<div class="h-screen v-screen bg-gray-100 dark:bg-slate-900 overflow-auto">
+	<div class="h-screen v-screen bg-gray-100 dark:bg-slate-900 overflow-y-auto">
 		{#if !token}
 			<Login />
 		{:else}

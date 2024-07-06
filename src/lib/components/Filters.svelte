@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let filterSubs: boolean;
 	export let filterMods: boolean;
-	export let minMonths: number;
+	export let selectedMinMonths: number;
 	export let maxMonths: number;
 </script>
 
@@ -22,38 +22,19 @@
 			></div>
 			<span class="ms-3 text-sm font-medium text-colored">Subscribed Only</span>
 		</label>
-		{#if filterSubs}
-			<form class="max-w-sm mx-auto">
-				<label for="number-input" class="block mb-2 text-sm font-medium text-colored"
-					>Min Months:</label
-				>
-				<input
-					type="number"
-					id="min-months-input"
-					aria-describedby="min-months-input"
-					class="bg-gray-50 border border-gray-300 text-colored text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-					bind:value={minMonths}
-					min={0}
-					max={maxMonths}
-					required
-				/>
-			</form>
 
-			<form class="max-w-sm mx-auto">
-				<label for="number-input" class="block mb-2 text-sm font-medium text-colored"
-					>Max Months:</label
-				>
-				<input
-					type="number"
-					id="max-months-input"
-					aria-describedby="max-months-input"
-					class="bg-gray-50 border border-gray-300 text-colored text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-					bind:value={maxMonths}
-					min={minMonths}
-					max={maxMonths}
-					required
-				/>
-			</form>
-		{/if}
+		<label for="number-input" class="block mb-2 text-sm font-medium text-colored">
+			<span>Min Months:</span>
+			<input
+				type="number"
+				id="min-months-input"
+				aria-describedby="min-months-input"
+				class="bg-slate-100 dark:bg-slate-400 border border-gray-300 disabled:bg-slate-300 disabled:dark:bg-slate-900 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none text-colored text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+				bind:value={selectedMinMonths}
+				min={0}
+				max={maxMonths}
+				disabled={!filterSubs}
+			/>
+		</label>	
 	</div>
 </section>

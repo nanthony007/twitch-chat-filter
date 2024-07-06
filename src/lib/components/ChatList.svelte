@@ -12,24 +12,16 @@
 		socketClosed,
 		chatMessages,
 		filterSettingsStore,
-		type FilterSettings
 	} from '../stores';
 
 	let username: string;
 	let inputString = '';
+	let selectedMinMonths = 0;
 
-	// update min/max whenever chatMessages change
-	$: {
-		filterSettingsStore.update((s) => {
-			s.subFilterRange.maximum = $chatMessages
-				.map((msg) => msg.tags.subMonths || 0)
-				.reduce((a, b) => Math.max(a, b), 0);
-			s.subFilterRange.minimum = $chatMessages
-				.map((msg) => msg.tags.subMonths || 0)
-				.reduce((a, b) => Math.min(a, b), 0);
-			return s;
-		});
-	}
+	// update min whenever chatMessages change
+	$:maxMonths = Math.max(
+		...$chatMessages.map((m) => m.tags.subMonths || 0)
+	);
 	// update search string only when input is changed
 	$: {
 		filterSettingsStore.update((s) => {
@@ -41,32 +33,29 @@
 	const filteredMessages = derived(
 		[chatMessages, filterSettingsStore],
 		([$chatMessages, $filterSettingsStore]) => {
-			return $chatMessages.filter((m) => {
-				if ($filterSettingsStore.filterSubs && m.tags.isSub) {
-					return true;
+			let filtered = $chatMessages;
+			if ($filterSettingsStore.filterSubs) {
+				filtered = filtered.filter((m) => m.tags.isSub);
+				if (selectedMinMonths > 0) {
+					filtered = filtered.filter((m) => {
+						let months = m.tags.subMonths ? m.tags.subMonths : 0;
+						return months>= selectedMinMonths;
+					});
 				}
-				if ($filterSettingsStore.filterMods && m.tags.isMod) {
-					return true;
-				}
-				if (m.tags.subMonths && m.tags.subMonths > $filterSettingsStore.subFilterRange.minimum) {
-					return true;
-				}
-				if (m.tags.subMonths && m.tags.subMonths < $filterSettingsStore.subFilterRange.maximum) {
-					return true;
-				}
-				if ($filterSettingsStore.searchString) {
-					if (
-						m.content.toLowerCase().includes($filterSettingsStore.searchString.toLowerCase()) ||
-						m.tags.displayName
-							.toLowerCase()
-							.includes($filterSettingsStore.searchString.toLowerCase())
-					) {
-						return true;
-					}
-				}
-				return false;
-			});
-		}
+			}
+			if ($filterSettingsStore.filterMods) {
+				filtered = filtered.filter((m) => m.tags.isMod);
+			}
+			if ($filterSettingsStore.searchString) {
+				filtered = filtered.filter((m) =>
+					m.tags.displayName
+						.toLowerCase()
+						.includes($filterSettingsStore.searchString.toLowerCase()) ||
+					m.content.toLowerCase().includes($filterSettingsStore.searchString.toLowerCase())
+				);
+			}
+			return filtered;
+		}	
 	);
 
 	onMount(async () => {
@@ -95,74 +84,80 @@
 		{:else if $socketClosed}
 			<p class="text-success">Connection closed</p>
 		{:else}
-			<div class="px-8 space-y-2 mx-auto w-full xl:w-3/4 scroll-auto h-screen">
+			<div class="px-8 space-y-2 mx-auto w-full xl:w-3/4">
 				<Filters
-					filterSubs={$filterSettingsStore.filterSubs}
-					filterMods={$filterSettingsStore.filterMods}
-					minMonths={$filterSettingsStore.subFilterRange.minimum}
-					maxMonths={$filterSettingsStore.subFilterRange.maximum}
+					bind:filterSubs={$filterSettingsStore.filterSubs}
+					bind:filterMods={$filterSettingsStore.filterMods}
+					bind:selectedMinMonths={selectedMinMonths}
+					bind:maxMonths={maxMonths}
 				/>
 				<Search bind:inputString />
-				<table class="table-auto mx-auto text-colored">
-					<thead class="border-b-2">
-						<tr>
-							<th class="px-4 text-center">Display Name</th>
-							<th class="px-4 text-center">Message</th>
-							<th class="px-4 text-center">Subbed</th>
-							<th class="px-4 text-center">Modded</th>
-							<th class="px-4 text-center">Sub Months</th>
+
+				<table class="table-auto mx-auto">
+					<thead>
+						<tr class="border-b-2">
+							<th class="px-4 text-center font-bold">Username</th>
+							<th class="px-4 text-center font-bold">Message</th>
+							<th class="px-4 text-center font-bold">Subbed</th>
+							<th class="px-4 text-center font-bold">Modded</th>
+							<th class="px-4 text-center font-bold">SubMonths</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each $filteredMessages as msg}
-							<tr class="border-b-2">
-								<td class="font-bold">
-									@{msg.tags.displayName ? msg.tags.displayName : 'Unknown'}</td
-								>
-								<td class="font-thin">{msg.content}</td>
-								<td class="mx-auto">
-									{#if msg.tags.isSub}
-										<div class="flex justify-center">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="size-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-												/>
-											</svg>
-										</div>
-									{/if}
-								</td>
-								<td>
-									{#if msg.tags.isMod}
-										<div class="flex justify-center">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="size-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-												/>
-											</svg>
-										</div>
-									{/if}
-								</td>
-								<td class="text-center font-thin">{msg.tags.subMonths ? msg.tags.subMonths : ''}</td
-								>
-							</tr>
+						<tr class="border-b-2 hover:bg-slate-200 dark:hover:bg-slate-400">
+							<td class="font-bold underline border-r-2 text-left">
+								<a href={`https://twitch.tv/${msg.tags.displayName || ''}`}>
+									@{msg.tags.displayName ? msg.tags.displayName : 'Unknown'}
+								</a>
+							</td>
+							<td class="font-thin">{msg.content}</td>
+							<td class="mx-auto">
+								{#if msg.tags.isSub}
+									<div class="flex justify-center">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="size-6"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+											/>
+										</svg>
+									</div>
+								{/if}
+							</td>
+							<td>
+								{#if msg.tags.isMod}
+									<div class="flex justify-center">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="size-6"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+											/>
+										</svg>
+									</div>
+								{/if}
+							</td>
+							<td class="text-center font-thin">
+								{#if msg.tags.subMonths}
+									{msg.tags.subMonths}					
+								{/if}
+							</td>
+						</tr>
 						{/each}
 					</tbody>
 				</table>
