@@ -20,7 +20,7 @@ interface UsersData {
 }
 
 export const connectWS = (token: string, username: string): WebSocket => {
-	const ws = new WebSocket("ws://irc-ws.chat.twitch.tv:80");
+	const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
 	ws.onopen = () => {
 		ws.send("CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands");
 		ws.send(`PASS oauth:${token}`);
