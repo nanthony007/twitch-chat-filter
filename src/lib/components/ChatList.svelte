@@ -54,7 +54,7 @@
 					m.content.toLowerCase().includes($filterSettingsStore.searchString.toLowerCase())
 				);
 			}
-			return filtered;
+			return filtered.toReversed();
 		}	
 	);
 
